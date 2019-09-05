@@ -114,7 +114,7 @@ userDb.getById(userId)
     .then(response => {
         if (response === undefined) {
             res.status(400).json({
-                error: 'invalid user id.'
+                error: 'Invalid user id.'
             })
         }
         else {
@@ -125,24 +125,35 @@ userDb.getById(userId)
 };
 
 function validateUser(req, res, next) {
-if (!req.body) {
-    res.status(400).json({ 
-        error: 'missing user data.'
-    })
-} 
-else {
-    if (req.body.name) {
-        next();
-    }
-    else {
+    if (!req.body) {
+        res.status(400).json({ 
+            error: 'Missing user data.'
+        })
+    } 
+    else if (!req.body.name) {
         res.status(400).json({
-            error: 'missing required name field.'
+            error: 'Missing the required name field.'
         })
     }
-}  
+    else {
+        next();
+    }  
 };
 
 function validatePost(req, res, next) {
+    if (!req.body) {
+        res.status(400).json({
+            error: 'Post data is missing.'
+        })
+    }
+    else if (!req.body.text) {
+        res.status(400).json({
+            error: 'Post is missing a required text field.'
+        })
+    }
+    else {
+        next();
+    }
 
 };
 
