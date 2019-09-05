@@ -1,12 +1,12 @@
 const express = require('express');
 const userDb = require('./userDb.js');
-const postDb = require('./posts/postDb.js');
+const postDb = require('../posts/postDb.js');
 
 const router = express.Router();
 router.use(express.json());
 
 //adding a user
-router.post('/', (req, res) => {
+router.post('/', validateUser, (req, res) => {
 const user = req.body;
 
 userDb.insert(user)
@@ -21,12 +21,12 @@ userDb.insert(user)
 });
 
 //adding a post to a user
-router.post('/:id/posts', (req, res) => {
+router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
 const post = req.body;
 
 postDb.insert(post)
     .then(userPost => {
-        res.status(201).json(post);
+        res.status(201).json(userPost);
     })
     .catch(error => {
         res.status(500).json({
@@ -39,7 +39,7 @@ postDb.insert(post)
 router.get('/', (req, res) => {
 userDb.get()
     .then(allUsers => {
-        res.status.apply(200).json(allUsers)
+        res.status(200).json(allUsers)
     })
     .catch(error => {
         res.status(500).json({
@@ -63,7 +63,7 @@ userDb.getById(id)
 });
 
 //get user's posts
-router.get('/:id/posts', (req, res) => {
+router.get('/:id/posts', validateUserId, (req, res) => {
 const id = req.params.id;
 userDb.getUserPosts(id)
     .then(posts => {
@@ -77,15 +77,32 @@ userDb.getUserPosts(id)
 });
 
 //delete user
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateUserId, (req, res) => {
 const id = req.params.id;
 userDb.remove(id)
-    .then()
+    .then(deletedUser => {
+        res.status(200).json(deletedUser)
+    })
+    .catch(error => {
+        res.status(500).json({
+            error: 'There was an error deleting the user.'
+        })
+    })
 });
 
 //edit user
-router.put('/:id', (req, res) => {
-
+router.put('/:id', validateUserId, validateUser, (req, res) => {
+const id = req.params.id;
+const edits = req.body;
+userDb.update(id, edits)
+    .then(updatedUser => {
+        res.status(200).json(updatedUser)
+    })
+    .catch(error => {
+        res.status(500).json({
+            error: 'There was an error editing the user.'
+        })
+    })
 });
 
 //custom middleware
